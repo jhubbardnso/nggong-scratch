@@ -25,14 +25,49 @@ reviewers to determine whether:
 
 ### In Scope
 
-TODO: Define the boundaries of the HLS conceptual design.
+High Level Software (`HLS`) covers the software responsible for observatory-level
+coordination, site-level operation, and the high-level interfaces needed to
+operate ngGONG as a six-site observing network.
 
-At minimum, this section should identify:
+The two primary HLS subsystems are:
 
-- The HLS responsibilities within ngGONG.
-- The major software systems and subsystems covered by this document.
-- The architectural concerns addressed at CoDR.
-- The level of detail appropriate for conceptual design.
+- The Observatory Control System (`OCS`), which runs at a central location such
+  as National Solar Observatory headquarters in Boulder or in a cloud-hosted
+  environment.
+- The Site Control System (`SCS`), with one SCS instance responsible for
+  operating each ngGONG site.
+
+TODO: Expand the SCS description. The SCS is a relatively complicated system and
+needs additional detail on its internal responsibilities, major subcomponents,
+and site-level operating model.
+
+The OCS sends high-level intent to each SCS instance. These commands are
+expected to express operational intent rather than low-level device behavior. An
+example is an instruction to shut down a site because of an incoming hurricane.
+
+Each SCS instance is responsible for operating its site and reporting
+observatory-relevant information back to the OCS. This includes telemetry,
+health and status information, alarms, and logging information so OCS users can
+monitor the system as a whole.
+
+HLS includes the high-level software interfaces to:
+
+- Humans using the OCS to monitor and operate ngGONG.
+- Controls, which is broadly responsible for the Programmable Logic Controller
+  (`PLC`) systems and low-level control of station hardware. HLS uses this
+  interface to command motors and other hardware devices.
+- The Data Management System (`DMS`), through which HLS offloads data acquired
+  at each site. DMS is responsible for final data reduction, distribution, and
+  making data available to science and other consumers.
+
+HLS is expected to perform limited station-side data handling or reduction where
+needed for operations or data acquisition, such as coadding accumulated camera
+frames. HLS is not responsible for producing science-ready data products.
+
+At CoDR, this document should show that the main HLS boundaries are understood,
+that the architecture can support six sites and continuous 24/7 operation, that
+station autonomy is feasible, that the major external interfaces have been
+identified, and that key architectural risks are being driven down.
 
 ### Out of Scope
 
@@ -49,6 +84,8 @@ the operational concept in full.
 The following items are out of scope for this CoDR-level document and belong at
 PDR or later unless a limited conceptual example is needed:
 
+- Production of science-ready data products.
+- Low-level servo control, which is the responsibility of Controls.
 - Detailed DDS topic definitions.
 - Complete protobuf definitions.
 - Detailed APIs.
