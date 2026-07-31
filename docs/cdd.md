@@ -98,29 +98,87 @@ PDR or later unless a limited conceptual example is needed:
 
 ## Design Drivers
 
-TODO: Describe the major drivers shaping the HLS architecture.
+The HLS architecture is driven by the need to operate ngGONG as a distributed,
+largely autonomous observing network. The following drivers shape the conceptual
+design.
 
-Potential drivers include:
+### Continuous Six-Site Observing
 
-- Continuous solar observing across six geographically distributed sites.
-- Remote and local station operation.
-- Reliability and fault tolerance.
-- Observatory-wide coordination.
-- Data flow from stations to downstream systems.
-- Maintainability across a long system lifetime.
-- Evolvability from conceptual design through PDR and implementation.
+ngGONG will operate observing stations at six geographically distributed sites
+in order to observe the Sun continuously. HLS must support routine,
+day-after-day operation at each site while allowing the OCS to monitor the
+health and status of the full network.
+
+### Station Autonomy
+
+Each site must be able to continue operating for an extended period without
+communication to the OCS. The current assumption is that a site should be able
+to operate independently for weeks or longer, pending confirmation by OCD
+requirements.
+
+This autonomy implies that the SCS must be able to continue routine operations,
+recover from basic problems, retain acquired data locally when DMS is
+unreachable, and resume orderly data offload when connectivity is restored.
+
+### Supervisory OCS Role
+
+The OCS is expected to be supervisory rather than an active coordinator of
+observing activity across sites. Each site should perform its normal work with
+little outside input. The OCS provides network-level visibility and can send
+high-level operational intent, but routine observing should not depend on
+continuous OCS coordination.
+
+### Data Retention and Offload
+
+Loss of communication with the OCS is expected to coincide with loss of access
+to DMS in many cases. HLS therefore needs a station-side data retention strategy
+and a way to prioritize data offload ordering when connectivity is restored.
+The detailed retention policy and prioritization rules are TBD.
+
+### Reliability and Recovery
+
+Quantitative reliability and availability goals have not yet been defined. At
+the conceptual design level, the architecture should support recovery from basic
+problems and avoid unnecessary dependence on continuous central connectivity.
+The current assumption is that full redundancy across the entire control system
+is not required.
+
+### Maintainability and Evolution
+
+The HLS architecture must be maintainable across a long system lifetime and
+evolve from conceptual design through PDR and implementation. Architectural
+choices should preserve clear subsystem boundaries, support incremental risk
+reduction, and leave room for requirements that are still being developed.
 
 ## Architecture Overview
 
-TODO: Provide a concise overview of the proposed HLS architecture.
+The top-level HLS architecture is site-autonomous. Each ngGONG site is expected
+to carry out routine observing and site operation with little outside input. The
+central OCS provides observatory-level monitoring and sends very high-level
+commands or operational intent to the sites, but it is not expected to actively
+coordinate observing activity across sites.
 
-This section should explain:
+The main architectural split is between the central OCS and the site-local SCS
+instances. The OCS gives users a network-level view of ngGONG and receives
+telemetry, health and status information, alarms, and logs from the SCS
+instances. The SCS at each site is responsible for local operation, commanding
+station hardware through Controls, directing camera acquisition, receiving
+camera readouts, performing limited station-side data handling where needed, and
+offloading acquired data to DMS.
 
-- The overall architectural style.
-- The separation between observatory-level and station-level software.
-- The main responsibilities of HLS.
-- The most important communication paths.
-- How the architecture supports 24/7 solar observing.
+The OCS-to-SCS interface is expected to carry high-level intent rather than
+low-level device commands. The current architectural direction is to use gRPC
+for this interface. Detailed service definitions, message schemas, and complete
+interface specifications are out of scope for CoDR.
+
+The SCS is expected to be a collection of cooperating software pieces rather
+than a single monolithic application. The SCS is substantially more complex than
+the OCS and will require additional design detail. That detail may be captured
+in an SCS Conceptual Design Document or by expanding the SCS sections of this
+HLS CDD.
+
+Software deployment management to the sites may be part of the OCS, but that
+responsibility is still TBD.
 
 ### System Context
 
